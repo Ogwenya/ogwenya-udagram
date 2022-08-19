@@ -28,27 +28,32 @@ import { filterImageFromURL, deleteLocalFiles } from "./util/util";
 
   /**************************************************************************** */
 
-  app.get("/filteredimage", async (req, res) => {
-    if (!req.query.image_url) {
-      res
-        .status(400)
-        .send(
-          'Image url not provided. Please use the format "/filteredimage?image_url=your_url"'
-        );
+  app.get(
+    "/filteredimage",
+    async (req: express.Request, res: express.Response) => {
+      if (!req.query.image_url) {
+        res
+          .status(400)
+          .send(
+            'Image url not provided. Please use the format "/filteredimage?image_url=your_url"'
+          );
+      }
+      const image_url = req.query.image_url;
+      try {
+        const image = await filterImageFromURL(image_url);
+        return res.status(200).sendFile(image, () => deleteLocalFiles([image]));
+      } catch (error) {
+        return res
+          .status(400)
+          .send("Something went wrong. Please try again...");
+      }
     }
-    const image_url = req.query.image_url;
-    try {
-      const image = await filterImageFromURL(image_url);
-      return res.status(200).sendFile(image, () => deleteLocalFiles([image]));
-    } catch (error) {
-      return res.status(400).send("Something went wrong. Please try again...");
-    }
-  });
+  );
   //! END @TODO1
 
   // Root Endpoint
   // Displays a simple message to the user
-  app.get("/", async (req, res) => {
+  app.get("/", async (req: express.Request, res: express.Response) => {
     res.send("try GET /filteredimage?image_url={{}}");
   });
 
